@@ -3,6 +3,9 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register('folder', views.FolderViewSet)
-router.register('file', views.FileViewSet)
+# router.register('file', views.FileViewSet)
 
-urlpatterns = router.urls
+folder_router = routers.NestedDefaultRouter(router, 'folder', lookup='folder')
+folder_router.register('files', views.FileViewSet, basename='folder-files')
+
+urlpatterns = router.urls + folder_router.urls
