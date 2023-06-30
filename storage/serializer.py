@@ -35,3 +35,17 @@ class AddFileInFolderSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
         fields = ['id', 'name', 'file_content']
+
+
+class FileAccessSerializer(serializers.ModelSerializer):
+    file = FileSerializer(read_only=True)
+
+    class Meta:
+        model = FileAccess
+        fields = ['id',  'file', 'email', 'permission']
+
+
+class NewFileAccessSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FileAccess
+        fields = ['id', 'file', 'email', 'permission']
