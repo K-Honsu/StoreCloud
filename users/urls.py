@@ -1,9 +1,7 @@
 from rest_framework_nested import routers
+from . import views
 
 router = routers.DefaultRouter()
-# routers.register()
+router.register('user-account', views.UserViewSet)
 
-
-urlpatterns = [
-
-]
+urlpatterns = router.urls
