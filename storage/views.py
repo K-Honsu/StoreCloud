@@ -24,8 +24,25 @@ class FileViewSet(ModelViewSet):
         return FileSerializer
 
 
-class FileAccessViewSet(ModelViewSet):
-    queryset = FileAccess.objects.all()
+class SendAccessViewSet(ModelViewSet):
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def get_queryset(self):
+        return SendAccess.objects.filter(file_id=self.kwargs['file_pk'])
+
+    def get_serializer_context(self):
+        return {'file_id': self.kwargs['file_pk']}
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return NewSendAccessSerializer
+        elif self.request.method == 'PATCH':
+            return UpdateSendAccessSerializer
+        return SendAccessSerializer
+
+
+# class FileAccessViewSet(ModelViewSet):
+#     queryset = FileAccess.objects.all()
     # permission_classes = [FilePermission | IsAuthenticated]
 
     # def get_queryset(self):
@@ -51,10 +68,10 @@ class FileAccessViewSet(ModelViewSet):
     #         query = query.none()
     # return query
 
-    def get_serializer_class(self):
-        if self.request.method == 'POST':
-            return NewFileAccessSerializer
-        return FileAccessSerializer
+    # def get_serializer_class(self):
+    #     if self.request.method == 'POST':
+    #         return NewFileAccessSerializer
+    #     return FileAccessSerializer
 
     # def check_user_privilege(self, user, file_access_id):
     #     return FilePermission().check_user_privilege(user, file_access_id)

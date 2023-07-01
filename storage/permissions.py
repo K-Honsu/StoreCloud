@@ -1,7 +1,5 @@
 from rest_framework import permissions
 from .enums import AccessControl
-from .models import FileAccess
-
 
 class FilePermission(permissions.BasePermission):
     def has_permission(self, request, view):

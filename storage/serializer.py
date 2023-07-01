@@ -2,10 +2,38 @@ from rest_framework import serializers
 from .models import *
 
 
+class NewSendAccessSerializer(serializers.ModelSerializer):
+    def save(self, **kwargs):
+        file_id = self.context['file_id']
+        email = self.validated_data['email']
+        permissions = self.validated_data['permissions']
+        self.instance = SendAccess.objects.create(
+            file_id=file_id, **self.validated_data)
+        return self.instance
+
+    class Meta:
+        model = SendAccess
+        fields = ['id', 'email', 'permissions']
+
+
+class UpdateSendAccessSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SendAccess
+        fields = ['id', 'email', 'permissions']
+
+
 class FileSerializer(serializers.ModelSerializer):
+    send_access = NewSendAccessSerializer(many=True, read_only=True)
+
     class Meta:
         model = File
-        fields = ['id', 'name', 'file_content']
+        fields = ['id', 'name', 'file_content', 'send_access']
+
+
+class SendAccessSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SendAccess
+        fields = ['id',  'email', 'permissions']
 
 
 class FolderSerializer(serializers.ModelSerializer):
@@ -20,32 +48,13 @@ class FolderSerializer(serializers.ModelSerializer):
 class AddFileInFolderSerializer(serializers.ModelSerializer):
     def save(self, **kwargs):
         folder_id = self.context['folder_id']
-        # file_id = self.validated_data['id']
         name = self.validated_data['name']
         file_content = self.validated_data['file_content']
-        try:
-            file_item = File.objects.get(folder_id=folder_id)
-            file_item.save()
-            self.instance = file_item
-        except File.DoesNotExist:
-            self.instance = File.objects.create(
-                folder_id=folder_id, **self.validated_data)
+
+        self.instance = File.objects.create(
+            folder_id=folder_id, **self.validated_data)
         return self.instance
 
     class Meta:
         model = File
         fields = ['id', 'name', 'file_content']
-
-
-class FileAccessSerializer(serializers.ModelSerializer):
-    file = FileSerializer(read_only=True)
-
-    class Meta:
-        model = FileAccess
-        fields = ['id',  'file', 'email', 'permission']
-
-
-class NewFileAccessSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FileAccess
-        fields = ['id', 'file', 'email', 'permission']
