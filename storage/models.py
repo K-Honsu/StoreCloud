@@ -1,5 +1,8 @@
+from .enums import AccessControl
 from django.db import models
+from django.contrib.auth import get_user_model
 import uuid
+User = get_user_model()
 
 
 class Folder(models.Model):
@@ -20,3 +23,14 @@ class File(models.Model):
 
     def __str__(self):
         return self.name
+
+class SendAccess(models.Model):
+    file = models.ForeignKey(
+        File, on_delete=models.CASCADE, related_name='send_access', null=True)
+    email = models.EmailField()
+    permissions = models.CharField(choices=[(
+        ap.value, ap.name) for ap in AccessControl], max_length=100, default=AccessControl.VIEW.value)
+    requested_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.email} -> {self.file} -> {self.permissions}'
