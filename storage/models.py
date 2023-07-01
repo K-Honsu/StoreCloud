@@ -18,11 +18,12 @@ class File(models.Model):
     folder = models.ForeignKey(
         Folder, on_delete=models.CASCADE, related_name='files')
     name = models.CharField(max_length=255)
-    file_content = models.FileField(upload_to='upload')
+    file_url = models.FileField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
+
 
 class SendAccess(models.Model):
     file = models.ForeignKey(
