@@ -27,10 +27,18 @@ class UpdateSendAccessSerializer(serializers.ModelSerializer):
 
 class FileSerializer(serializers.ModelSerializer):
     send_access = NewSendAccessSerializer(many=True, read_only=True)
+    size = serializers.SerializerMethodField()
+
+    def get_size(self, obj: File):
+        if obj.file_url:
+            file_size = obj.file_url.size
+            size_in_mb = file_size / (1024 * 1024)
+            return size_in_mb
+        return 0
 
     class Meta:
         model = File
-        fields = ['id', 'name', 'file_url', 'send_access']
+        fields = ['id', 'name', 'file_url', 'size', 'send_access']
 
 
 class SendAccessSerializer(serializers.ModelSerializer):

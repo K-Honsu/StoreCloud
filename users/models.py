@@ -36,8 +36,8 @@ class UserAccount(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     is_admin = models.BooleanField(default=False)
-    is_staff = models.BooleanField(default=True)
-    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
 
     objects = UserAccountManager()
 
@@ -46,3 +46,16 @@ class UserAccount(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.first_name + self.last_name
+
+
+class OTP(models.Model):
+    otp = models.CharField(max_length=6)
+    user = models.ForeignKey(
+        UserAccount, on_delete=models.CASCADE, related_name='otp')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def check_otp(self, otp):
+        return self.otp == otp
+
+    def __str__(self):
+        return f'{self.user} -> {self.otp}'

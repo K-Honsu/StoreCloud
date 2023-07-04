@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 'sendgrid_backend',
+    'sendgrid',
     'users',
     'storage',
     'djoser',
@@ -64,7 +66,7 @@ ROOT_URLCONF = 'storeCloud.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -99,6 +101,8 @@ DATABASES = {
         'HOST': config('DB_HOST')
     }
 }
+
+SENDGRID_API_KEY = config('SENDGRID_API_KEY')
 
 
 # Password validation
@@ -185,9 +189,32 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('JWT',),
 }
 
+DJOSER = {
+    'SEND_ACTIVATION_EMAIL': True,
+    'SEND_CONFIRMATION_EMAIL': True,
+    'PASSWORD_CHANGED_EMAIL_CONFIRMATION': True,
+    # 'USERNAME_CHANGED_EMAIL_CONFIRMATION': True,
+    # 'ACTIVATION_URL': 'https://nitoauth.onrender.com/confirm/{uid}/{token}', #change to Frontend url
+    # 'PASSWORD_RESET_CONFIRM_URL': 'api/v1/accounts/password-reset/{uid}/{token}', #change to Frontend url
+    'LOGOUT_ON_PASSWORD_CHANGE': True,
+    'SERIALIZERS': {
+        'user_create': 'users.serializers.UserCreateSerializer',
+        'current_user': 'djoser.serializers.UserSerializer',
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.UserAccount'
+
+# EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+
+SENDGRID_API_KEY = config('SENDGRID_API_KEY')
+
+SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+# 'Sender Name <from@example.com>'
+DEFAULT_FROM_EMAIL = ('StoreCloud' + " " +
+                      f'<{config("EMAIL_HOST_SENDGRID")}>')

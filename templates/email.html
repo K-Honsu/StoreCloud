@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    {% csrf_token %}
+    <p>Dear {{ user }},</p>
+    <p>Your OTP for account activation is: <strong>{{ otp }}</strong></p>
+    <p>
+      Please enter this OTP in the activation page to complete your
+      registration.
+    </p>
+  </body>
+</html>

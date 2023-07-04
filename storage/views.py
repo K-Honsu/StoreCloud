@@ -1,19 +1,28 @@
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from .permissions import *
+from .pagination import DefaultPagination
 from .models import *
 from .serializer import *
 from rest_framework import permissions
+from rest_framework.filters import SearchFilter
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 
 
 class FolderViewSet(ModelViewSet):
     queryset = Folder.objects.prefetch_related('files').all()
     serializer_class = FolderSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['name']
 
 
 class FileViewSet(ModelViewSet):
+    filter_backends = [SearchFilter]
+    search_fields = ['name']
+    pagination_class = DefaultPagination
+
     def get_queryset(self):
-        return File.objects.filter(folder_id=self.kwargs['folder_pk'])
+        return File.objects.filter(folder_id=self.kwargs['folder_pk']).order_by('-created_at')
 
     def get_serializer_context(self):
         return {'folder_id': self.kwargs['folder_pk']}

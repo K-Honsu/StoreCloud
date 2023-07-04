@@ -20,6 +20,7 @@ class File(models.Model):
     name = models.CharField(max_length=255)
     file_url = models.FileField()
     created_at = models.DateTimeField(auto_now_add=True)
+    size = models.FloatField(default=0)
 
     def __str__(self):
         return self.name
