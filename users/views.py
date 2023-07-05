@@ -1,5 +1,6 @@
 from .serializer import *
 from .models import *
+from .permissions import IsAnonymous
 from django.conf import settings
 from django.contrib.auth import get_user_model
 # from django.core.mail import send_mail
@@ -10,14 +11,9 @@ from django.shortcuts import get_object_or_404
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, Content
 from rest_framework import status
-from rest_framework.generics import CreateAPIView
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
-# from rest_framework.permissions import IsAuthenticated
-
-from pprint import pprint
-
 User = get_user_model()
 
 
@@ -73,7 +69,7 @@ class UserViewSet(ModelViewSet):
 
 
 class VerfiyOTP(APIView):
-    # permission_classes = [All]
+    permission_classes = [IsAnonymous]
 
     def post(self, request):
         serializer = VerifyOTPSerializer(data=request.data)
@@ -91,3 +87,4 @@ class VerfiyOTP(APIView):
             return Response({'status': 'success', 'message': 'OTP validated successfully'}, status=status.HTTP_200_OK)
         else:
             return Response({'status': 'error', 'message': 'Error validating OTP code'}, status=status.HTTP_400_BAD_REQUEST)
+        

@@ -208,9 +208,15 @@ DJOSER = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.UserAccount'
+EMAIL_HOST_MAIL = config('EMAIL_HOST_SENDGRID')
 
 # EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
-EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'localhost'
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+EMAIL_PORT = 2525
+DEFAULT_FROM_EMAIL = 'admin@localhost'
 
 SENDGRID_API_KEY = config('SENDGRID_API_KEY')
 

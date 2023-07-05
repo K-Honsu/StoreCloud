@@ -1,28 +1,38 @@
-from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from .permissions import *
 from .pagination import DefaultPagination
 from .models import *
 from .serializer import *
+from django.urls import reverse
+from django.conf import settings
+from django.utils.html import strip_tags
+from django.core.mail import send_mail
+from django.template.loader import get_template
 from rest_framework import permissions
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.views import APIView
 from rest_framework.filters import SearchFilter
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 
 
 class FolderViewSet(ModelViewSet):
-    queryset = Folder.objects.prefetch_related('files').all()
     serializer_class = FolderSerializer
     filter_backends = [SearchFilter]
     search_fields = ['name']
+
+    def get_queryset(self):
+        return Folder.objects.filter(user=self.request.user).prefetch_related('files').all()
 
 
 class FileViewSet(ModelViewSet):
     filter_backends = [SearchFilter]
     search_fields = ['name']
+    permission_classes = [FilePermission]
     pagination_class = DefaultPagination
 
     def get_queryset(self):
-        return File.objects.filter(folder_id=self.kwargs['folder_pk']).order_by('-created_at')
+        return File.objects.filter(folder_id=self.kwargs['folder_pk'], user=self.request.user).order_by('-created_at')
 
     def get_serializer_context(self):
         return {'folder_id': self.kwargs['folder_pk']}
@@ -50,37 +60,60 @@ class SendAccessViewSet(ModelViewSet):
         return SendAccessSerializer
 
 
-# class FileAccessViewSet(ModelViewSet):
-#     queryset = FileAccess.objects.all()
-    # permission_classes = [FilePermission | IsAuthenticated]
+class RequestAccessView(APIView):
+    def post(self, request, file_pk):
+        # Get the file object
+        try:
+            file = File.objects.get(id=file_pk)
+        except File.DoesNotExist:
+            return Response("File not found.", status=status.HTTP_404_NOT_FOUND)
 
-    # def get_queryset(self):
-    #     queryset = FileAccess.objects.all()
-    #     if self.request.user.is_authenticated:
-    #         user_email = self.request.user.email
-    #     else:
-    #         user_permissions = FileAccess.objects.filter(
-    #             email=user_email).values_list('permission', flat=True)
-    #         allowed_permissions = ['edit', 'comment']
+        # Get the user object
+        user = request.user
 
-    #         if 'edit' in user_permissions or 'comment' in user_permissions:
-    #             queryset = FileAccess.objects.filter(
-    #                 permission__in=allowed_permissions)
-    #         else:
-    #             queryset = FileAccess.objects.none()
+        # Get the file owner
+        file_owner = file.user
 
-    #     return queryset
-    # if self.request.method in ['PUT', 'PATCH']:
-    #     user_has_privilege = self.check_user_privilege(
-    #         self.request.user, self.kwargs['pk'])
-    #     if not user_has_privilege:
-    #         query = query.none()
-    # return query
+        # get the file name
+        file_name = file.name
 
-    # def get_serializer_class(self):
-    #     if self.request.method == 'POST':
-    #         return NewFileAccessSerializer
-    #     return FileAccessSerializer
+        # Get owner email
+        owner_email = file_owner.email
 
-    # def check_user_privilege(self, user, file_access_id):
-    #     return FilePermission().check_user_privilege(user, file_access_id)
+        # Generate accept and decline URLs
+        accept_url = request.build_absolute_uri(
+            reverse('accept_edit_access', args=[file_pk]))
+        # decline_url = request.build_absolute_uri(
+        #     reverse('decline_edit_access', args=[file_pk]))
+
+        subject = f'Edit Request Access for {file.name}'
+        template = get_template('request_access.html')
+        context = {'user': user, 'file': file_name,
+                   'accept_url': accept_url}  # 'decline_url': decline_url}
+        message = strip_tags(template.render(context))
+        from_email = settings.DEFAULT_FROM_EMAIL
+
+        send_mail(subject, message, from_email, [owner_email])
+
+        return Response("Request access sent successfully.", status=status.HTTP_200_OK)
+
+
+def accept_edit_access(request, file_pk):
+    # Retrieve the file object based on the file_pk parameter
+    try:
+        file = File.objects.get(pk=file_pk)
+    except File.DoesNotExist:
+        return Response({'message': 'File not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    # get the user object
+    user = request.user
+    # update the user permission
+    user.permission = 'edit'
+    user.save()
+    return Response({'message': 'Edit access granted'}, status=status.HTTP_200_OK)
+
+
+# request edit access
+# google sign in
+# storage capacity
+# payment intergration
