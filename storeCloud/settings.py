@@ -35,6 +35,7 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
+SITE_ID = 3
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -49,7 +50,23 @@ INSTALLED_APPS = [
     'storage',
     'djoser',
     'rest_framework',
+    'social_django',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {'access_type': 'offline'}
+    }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -224,3 +241,15 @@ SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 # 'Sender Name <from@example.com>'
 DEFAULT_FROM_EMAIL = ('StoreCloud' + " " +
                       f'<{config("EMAIL_HOST_SENDGRID")}>')
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('GOOGLE_CLIENT_ID')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config('GOOGLE_CLIENT_SECRET')
+
+# SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+# LOGIN_REDIRECT_URL = '127.0.0.1:3000'
+LOGIN_REDIRECT_URL = 'http://localhost:3000'

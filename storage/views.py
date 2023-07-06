@@ -61,12 +61,18 @@ class SendAccessViewSet(ModelViewSet):
 
 
 class RequestAccessView(APIView):
-    def post(self, request, file_pk):
-        # Get the file object
+    # def post(self, request, file_pk):
+    #     # Get the file object
+    #     try:
+    #         file = File.objects.get(id=file_pk)
+    #     except File.DoesNotExist:
+    #         return Response("File not found.", status=status.HTTP_404_NOT_FOUND)
+    def post(self, request, folder_pk, file_pk):
+        # Retrieve the file object using folder_pk and file_pk
         try:
-            file = File.objects.get(id=file_pk)
+            file = File.objects.get(folder__id=folder_pk, id=file_pk)
         except File.DoesNotExist:
-            return Response("File not found.", status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'File not found.'}, status=status.HTTP_404_NOT_FOUND)
 
         # Get the user object
         user = request.user
