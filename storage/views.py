@@ -119,7 +119,7 @@ def accept_edit_access(request, file_pk):
     return Response({'message': 'Edit access granted'}, status=status.HTTP_200_OK)
 
 
-# request edit access
-# google sign in
-# storage capacity
-# payment intergration
+# request edit access -- done
+# google sign in -- done
+# storage capacity -- under development
+# payment intergration -- under development

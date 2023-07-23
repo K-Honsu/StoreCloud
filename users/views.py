@@ -70,6 +70,40 @@ class VerfiyOTP(APIView):
             return Response({'status': 'error', 'message': 'Error validating OTP code'}, status=status.HTTP_400_BAD_REQUEST)
 
 # google oauth
+
+
+# class GoogleOauth(APIView):
+#     def post(self, request):
+#         social_account = get_object_or_404(
+#             SocialAccount,
+#             user=request.user,
+#             provider='google'
+#         )
+#         access_token = SocialToken.objects.get(
+#             app__provider='google',
+#             account=social_account
+#         ).token
+#         refresh_token = SocialToken.objects.get(
+#             app__provider='google',
+#             account=social_account
+#         ).token_secret
+
+#         username = social_account.extra_data['name']
+#         first_name = social_account.extra_data['given_name']
+#         email = social_account.extra_data['email']
+
+#         data = {
+#             'username': username,
+#             'first_name': first_name,
+#             'email': email,
+#             'access_token': access_token,
+#             'refresh_token': refresh_token,
+#         }
+#         print("Access Token:", access_token)
+#         print("Refresh Token:", refresh_token)
+#         print(data)
+
+#         return Response(data)
 class GoogleOauth(APIView):
     def post(self, request):
         social_account = get_object_or_404(
@@ -77,14 +111,8 @@ class GoogleOauth(APIView):
             user=request.user,
             provider='google'
         )
-        access_token = SocialToken.objects.get(
-            app__provider='google',
-            account=social_account
-        ).token
-        refresh_token = SocialToken.objects.get(
-            app__provider='google',
-            account=social_account
-        ).token_secret
+        access_token = social_account.access_token
+        refresh_token = social_account.refresh_token
 
         username = social_account.extra_data['name']
         first_name = social_account.extra_data['given_name']

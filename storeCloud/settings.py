@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'storage',
     'djoser',
     'rest_framework',
+    'corsheaders',
     'social_django',
     'django.contrib.sites',
     'allauth',
@@ -70,6 +71,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -252,4 +254,11 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config('GOOGLE_CLIENT_SECRET')
 
 # SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
 # LOGIN_REDIRECT_URL = '127.0.0.1:3000'
-LOGIN_REDIRECT_URL = 'http://localhost:3000'
+# LOGIN_REDIRECT_URL = 'http://localhost:3000'
+LOGIN_REDIRECT_URL = 'http://localhost:8000/storage/folder/f9137b80-5dfa-4767-9908-c43df2f28ddc/files/12/'
+# CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:3001',  # Replace with your frontend URL
+# ]
+# CORS_ALLOW_CREDENTIALS = True
+# CORS_ORIGIN_ALLOW_ALL = True
