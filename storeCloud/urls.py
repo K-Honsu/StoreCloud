@@ -9,6 +9,7 @@ urlpatterns = [
     path('auth/', include('djoser.urls.jwt')),
     path('user/', include('users.urls')),
     path('storage/', include('storage.urls')),
+    path('accounts/', include('allauth.urls')),
 ]
 
 

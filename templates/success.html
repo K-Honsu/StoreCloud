@@ -6,11 +6,8 @@
   </head>
   <body>
     {% csrf_token %}
-    <h1>Dear {{ user }},</h1>
-    <p>Your OTP for account activation is: <bold>{{ otp }}</bold></p>
-    <p>
-      Please enter this OTP in the activation page to complete your
-      registration.
-    </p>
+    <h1>Dear {{ user.username }},</h1>
+    <h3>Your account has been activated Successfully!</h3>
+    <h3>We hope you enjoy our services!</h3>
   </body>
 </html>

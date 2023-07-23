@@ -3,13 +3,14 @@ from .models import *
 from .permissions import IsAnonymous
 from django.conf import settings
 from django.contrib.auth import get_user_model
-# from django.core.mail import send_mail
+from django.core.mail import send_mail
 from django.template.loader import get_template
 from django.utils.html import strip_tags
 from django.utils.crypto import get_random_string
 from django.shortcuts import get_object_or_404
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, Content
+from allauth.socialaccount.models import SocialAccount, SocialToken
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
@@ -38,34 +39,8 @@ class UserViewSet(ModelViewSet):
         user.set_password(password)
         user.save()
 
-        mail = Mail(
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            # to_emails=user.email,
-            to_email=user.email,
-            # html_content=message,
-            subject=subject)
-
-        # mail.add_to(user.email)
-        mail.content = Content("text/html", message)
-
-        try:
-            sendgrid_client = SendGridAPIClient(
-                api_key=settings.SENDGRID_API_KEY)
-            response = sendgrid_client.send(mail)
-            print(response)
-        except Exception as e:
-            # Handle the exception here
-            print(str(e))
-            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        response_data = {'id': user.id, 'email': user.email}
-        return Response(response_data, status=status.HTTP_201_CREATED)
-
-        # from_email = settings.DEFAULT_FROM_EMAIL
-        # receipient_list = [user.email]
-        # send_mail(subject, message, from_email, receipient_list)
-        # response_data = {'id': user.id, 'email': user.email}
-        # return Response(response_data, status=status.HTTP_201_CREATED)
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+        return Response({'status': 'success', 'message': 'User created successfully'}, status=status.HTTP_201_CREATED)
 
 
 class VerfiyOTP(APIView):
@@ -84,7 +59,74 @@ class VerfiyOTP(APIView):
             user = otp_instance.user
             user.is_active = True
             user.save()
+            subject = 'Welcome to StoreCloud'
+            template = get_template('success.html')
+            context = {'user': user}
+            message = strip_tags(template.render(context))
+            send_mail(subject, message,
+                      settings.DEFAULT_FROM_EMAIL, [user.email])
             return Response({'status': 'success', 'message': 'OTP validated successfully'}, status=status.HTTP_200_OK)
         else:
             return Response({'status': 'error', 'message': 'Error validating OTP code'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
+# google oauth
+
+
+# class GoogleOauth(APIView):
+#     def post(self, request):
+#         social_account = get_object_or_404(
+#             SocialAccount,
+#             user=request.user,
+#             provider='google'
+#         )
+#         access_token = SocialToken.objects.get(
+#             app__provider='google',
+#             account=social_account
+#         ).token
+#         refresh_token = SocialToken.objects.get(
+#             app__provider='google',
+#             account=social_account
+#         ).token_secret
+
+#         username = social_account.extra_data['name']
+#         first_name = social_account.extra_data['given_name']
+#         email = social_account.extra_data['email']
+
+#         data = {
+#             'username': username,
+#             'first_name': first_name,
+#             'email': email,
+#             'access_token': access_token,
+#             'refresh_token': refresh_token,
+#         }
+#         print("Access Token:", access_token)
+#         print("Refresh Token:", refresh_token)
+#         print(data)
+
+#         return Response(data)
+class GoogleOauth(APIView):
+    def post(self, request):
+        social_account = get_object_or_404(
+            SocialAccount,
+            user=request.user,
+            provider='google'
+        )
+        access_token = social_account.access_token
+        refresh_token = social_account.refresh_token
+
+        username = social_account.extra_data['name']
+        first_name = social_account.extra_data['given_name']
+        email = social_account.extra_data['email']
+
+        data = {
+            'username': username,
+            'first_name': first_name,
+            'email': email,
+            'access_token': access_token,
+            'refresh_token': refresh_token,
+        }
+        print("Access Token:", access_token)
+        print("Refresh Token:", refresh_token)
+        print(data)
+
+        return Response(data)

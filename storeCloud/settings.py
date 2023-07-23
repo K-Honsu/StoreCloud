@@ -35,6 +35,7 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
+SITE_ID = 3
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -49,10 +50,28 @@ INSTALLED_APPS = [
     'storage',
     'djoser',
     'rest_framework',
+    'corsheaders',
+    'social_django',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {'access_type': 'offline'}
+    }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -224,3 +243,22 @@ SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 # 'Sender Name <from@example.com>'
 DEFAULT_FROM_EMAIL = ('StoreCloud' + " " +
                       f'<{config("EMAIL_HOST_SENDGRID")}>')
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('GOOGLE_CLIENT_ID')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config('GOOGLE_CLIENT_SECRET')
+
+# SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+# LOGIN_REDIRECT_URL = '127.0.0.1:3000'
+# LOGIN_REDIRECT_URL = 'http://localhost:3000'
+LOGIN_REDIRECT_URL = 'http://localhost:8000/storage/folder/f9137b80-5dfa-4767-9908-c43df2f28ddc/files/12/'
+# CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     'http://localhost:3001',  # Replace with your frontend URL
+# ]
+# CORS_ALLOW_CREDENTIALS = True
+# CORS_ORIGIN_ALLOW_ALL = True
